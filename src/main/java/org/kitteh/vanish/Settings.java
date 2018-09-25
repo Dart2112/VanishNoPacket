@@ -4,6 +4,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public final class Settings {
+    private static final int confVersion = 5; // Tracking config version
     private static boolean enablePermTest;
     private static String fakeQuit;
     private static String fakeJoin;
@@ -11,25 +12,23 @@ public final class Settings {
     private static boolean worldChangeCheck;
     private static int lightningEffectCount;
 
-    private static final int confVersion = 5; // Tracking config version
-
-    public static boolean getAutoFakeJoinSilent() {
-        return Settings.autoFakeJoinSilent;
+    static boolean isAutoFakeJoinSilent() {
+        return !Settings.autoFakeJoinSilent;
     }
 
     public static boolean getEnablePermTest() {
         return Settings.enablePermTest;
     }
 
-    public static String getFakeJoin() {
+    static String getFakeJoin() {
         return Settings.fakeJoin;
     }
 
-    public static String getFakeQuit() {
+    static String getFakeQuit() {
         return Settings.fakeQuit;
     }
 
-    public static int getLightningCount() {
+    static int getLightningCount() {
         return Settings.lightningEffectCount;
     }
 

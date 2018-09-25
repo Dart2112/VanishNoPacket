@@ -28,26 +28,16 @@
 
 package org.kitteh.vanish.metrics;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.UUID;
-
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
+
+import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+import java.util.*;
 
 /**
  * <p>
@@ -62,241 +52,62 @@ import org.bukkit.plugin.Plugin;
  * void start(); <br/>
  * </code>
  */
+@SuppressWarnings("ALL")
 public class Metrics {
-
-    /**
-     * Represents a custom graph on the website
-     */
-    public static class Graph {
-
-        /**
-         * The graph's name, alphanumeric and spaces only :)
-         * If it does not comply to the above when submitted, it is rejected
-         */
-        private final String name;
-
-        /**
-         * The set of plotters that are contained within this graph
-         */
-        private final Set<Plotter> plotters = new LinkedHashSet<Plotter>();
-
-        private Graph(final String name) {
-            this.name = name;
-        }
-
-        /**
-         * Add a plotter to the graph, which will be used to plot entries
-         *
-         * @param plotter
-         */
-        public void addPlotter(final Plotter plotter) {
-            this.plotters.add(plotter);
-        }
-
-        @Override
-        public boolean equals(final Object object) {
-            if (!(object instanceof Graph)) {
-                return false;
-            }
-
-            final Graph graph = (Graph) object;
-            return graph.name.equals(this.name);
-        }
-
-        /**
-         * Gets the graph's name
-         *
-         * @return
-         */
-        public String getName() {
-            return this.name;
-        }
-
-        /**
-         * Gets an <b>unmodifiable</b> set of the plotter objects in the graph
-         *
-         * @return
-         */
-        public Set<Plotter> getPlotters() {
-            return Collections.unmodifiableSet(this.plotters);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.name.hashCode();
-        }
-
-        /**
-         * Remove a plotter from the graph
-         *
-         * @param plotter
-         */
-        public void removePlotter(final Plotter plotter) {
-            this.plotters.remove(plotter);
-        }
-
-    }
-
-    /**
-     * Interface used to collect custom data for a plugin
-     */
-    public static abstract class Plotter {
-
-        /**
-         * The plot's name
-         */
-        private final String name;
-
-        /**
-         * Construct a plotter with the default plot name
-         */
-        public Plotter() {
-            this("Default");
-        }
-
-        /**
-         * Construct a plotter with a specific plot name
-         *
-         * @param name
-         */
-        public Plotter(final String name) {
-            this.name = name;
-        }
-
-        @Override
-        public boolean equals(final Object object) {
-            if (!(object instanceof Plotter)) {
-                return false;
-            }
-
-            final Plotter plotter = (Plotter) object;
-            return plotter.name.equals(this.name) && (plotter.getValue() == this.getValue());
-        }
-
-        /**
-         * Get the column name for the plotted point
-         *
-         * @return the plotted point's column name
-         */
-        public String getColumnName() {
-            return this.name;
-        }
-
-        /**
-         * Get the current value for the plotted point
-         *
-         * @return
-         */
-        public abstract int getValue();
-
-        @Override
-        public int hashCode() {
-            return this.getColumnName().hashCode() + this.getValue();
-        }
-
-        /**
-         * Called after the website graphs have been updated
-         */
-        public void reset() {
-        }
-
-    }
 
     /**
      * The current revision number
      */
     private final static int REVISION = 5;
-
     /**
      * The base url of the metrics domain
      */
     private static final String BASE_URL = "http://stats.kitteh.org";
-
     /**
      * The url used to report a server's status
      */
     private static final String REPORT_URL = "/report/%s";
-
     /**
      * The file where guid and opt out is stored in
      */
     private static final String CONFIG_FILE = "plugins/PluginMetrics/config.yml";
-
     /**
      * The separator to use for custom data. This MUST NOT change unless you are hosting your own
      * version of metrics and want to change it.
      */
     private static final String CUSTOM_DATA_SEPARATOR = "~~";
-
     /**
      * Interval of time to ping (in minutes)
      */
     private static final int PING_INTERVAL = 10;
-
-    /**
-     * Encode text as UTF-8
-     *
-     * @param text
-     * @return
-     */
-    private static String encode(final String text) throws UnsupportedEncodingException {
-        return URLEncoder.encode(text, "UTF-8");
-    }
-
-    /**
-     * <p>
-     * Encode a key/value data pair to be used in a HTTP post request. This INCLUDES a & so the first key/value pair MUST be included manually, e.g:
-     * </p>
-     * <code>
-     * StringBuffer data = new StringBuffer();
-     * data.append(encode("guid")).append('=').append(encode(guid));
-     * encodeDataPair(data, "version", description.getVersion());
-     * </code>
-     *
-     * @param buffer
-     * @param key
-     * @param value
-     * @return
-     */
-    private static void encodeDataPair(final StringBuilder buffer, final String key, final String value) throws UnsupportedEncodingException {
-        buffer.append('&').append(Metrics.encode(key)).append('=').append(Metrics.encode(value));
-    }
-
     /**
      * The plugin this metrics submits for
      */
     private final Plugin plugin;
-
     /**
      * All of the custom graphs to submit to metrics
      */
     private final Set<Graph> graphs = Collections.synchronizedSet(new HashSet<Graph>());
-
     /**
      * The default graph, used for addCustomData when you don't want a specific graph
      */
     private final Graph defaultGraph = new Graph("Default");
-
     /**
      * The plugin configuration file
      */
     private final YamlConfiguration configuration;
-
     /**
      * The plugin configuration file
      */
     private final File configurationFile;
-
     /**
      * Unique server id
      */
     private final String guid;
-
     /**
      * Lock for synchronization
      */
     private final Object optOutLock = new Object();
-
     /**
      * Id of the scheduled task
      */
@@ -325,6 +136,35 @@ public class Metrics {
 
         // Load the guid then
         this.guid = this.configuration.getString("guid");
+    }
+
+    /**
+     * Encode text as UTF-8
+     *
+     * @param text
+     * @return
+     */
+    private static String encode(final String text) throws UnsupportedEncodingException {
+        return URLEncoder.encode(text, "UTF-8");
+    }
+
+    /**
+     * <p>
+     * Encode a key/value data pair to be used in a HTTP post request. This INCLUDES a & so the first key/value pair MUST be included manually, e.g:
+     * </p>
+     * <code>
+     * StringBuffer data = new StringBuffer();
+     * data.append(encode("guid")).append('=').append(encode(guid));
+     * encodeDataPair(data, "version", description.getVersion());
+     * </code>
+     *
+     * @param buffer
+     * @param key
+     * @param value
+     * @return
+     */
+    private static void encodeDataPair(final StringBuilder buffer, final String key, final String value) throws UnsupportedEncodingException {
+        buffer.append('&').append(Metrics.encode(key)).append('=').append(Metrics.encode(value));
     }
 
     /**
@@ -566,6 +406,144 @@ public class Metrics {
                 }
             }
         }
+    }
+
+    /**
+     * Represents a custom graph on the website
+     */
+    public static class Graph {
+
+        /**
+         * The graph's name, alphanumeric and spaces only :)
+         * If it does not comply to the above when submitted, it is rejected
+         */
+        private final String name;
+
+        /**
+         * The set of plotters that are contained within this graph
+         */
+        private final Set<Plotter> plotters = new LinkedHashSet<Plotter>();
+
+        private Graph(final String name) {
+            this.name = name;
+        }
+
+        /**
+         * Add a plotter to the graph, which will be used to plot entries
+         *
+         * @param plotter
+         */
+        public void addPlotter(final Plotter plotter) {
+            this.plotters.add(plotter);
+        }
+
+        @Override
+        public boolean equals(final Object object) {
+            if (!(object instanceof Graph)) {
+                return false;
+            }
+
+            final Graph graph = (Graph) object;
+            return graph.name.equals(this.name);
+        }
+
+        /**
+         * Gets the graph's name
+         *
+         * @return
+         */
+        public String getName() {
+            return this.name;
+        }
+
+        /**
+         * Gets an <b>unmodifiable</b> set of the plotter objects in the graph
+         *
+         * @return
+         */
+        public Set<Plotter> getPlotters() {
+            return Collections.unmodifiableSet(this.plotters);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.name.hashCode();
+        }
+
+        /**
+         * Remove a plotter from the graph
+         *
+         * @param plotter
+         */
+        public void removePlotter(final Plotter plotter) {
+            this.plotters.remove(plotter);
+        }
+
+    }
+
+    /**
+     * Interface used to collect custom data for a plugin
+     */
+    public static abstract class Plotter {
+
+        /**
+         * The plot's name
+         */
+        private final String name;
+
+        /**
+         * Construct a plotter with the default plot name
+         */
+        public Plotter() {
+            this("Default");
+        }
+
+        /**
+         * Construct a plotter with a specific plot name
+         *
+         * @param name
+         */
+        public Plotter(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public boolean equals(final Object object) {
+            if (!(object instanceof Plotter)) {
+                return false;
+            }
+
+            final Plotter plotter = (Plotter) object;
+            return plotter.name.equals(this.name) && (plotter.getValue() == this.getValue());
+        }
+
+        /**
+         * Get the column name for the plotted point
+         *
+         * @return the plotted point's column name
+         */
+        public String getColumnName() {
+            return this.name;
+        }
+
+        /**
+         * Get the current value for the plotted point
+         *
+         * @return
+         */
+        public abstract int getValue();
+
+        @Override
+        public int hashCode() {
+            return this.getColumnName().hashCode() + this.getValue();
+        }
+
+        /**
+         * Called after the website graphs have been updated
+         */
+        public void reset() {
+        }
+
     }
 
 }

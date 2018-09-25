@@ -11,14 +11,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.kitteh.vanish.hooks.HookManager;
 import org.kitteh.vanish.hooks.HookManager.HookType;
-import org.kitteh.vanish.listeners.ListenEntity;
-import org.kitteh.vanish.listeners.ListenInventory;
-import org.kitteh.vanish.listeners.ListenPlayerJoin;
-import org.kitteh.vanish.listeners.ListenPlayerMessages;
-import org.kitteh.vanish.listeners.ListenPlayerOther;
-import org.kitteh.vanish.listeners.ListenServerPing;
-import org.kitteh.vanish.listeners.ListenToYourHeart;
-import org.kitteh.vanish.listeners.TagAPIListener;
+import org.kitteh.vanish.listeners.*;
 import org.kitteh.vanish.metrics.MetricsOverlord;
 
 import java.io.BufferedReader;
@@ -31,86 +24,11 @@ import java.net.URLConnection;
 import java.util.HashSet;
 
 public final class VanishPlugin extends JavaPlugin {
-    final class UpdateCheck implements Runnable {
-        private static final String CREDITS = "This updater code is based on the great work of Gravity";
-
-        String getCredits() {
-            return CREDITS;
-        }
-
-        private final VanishPlugin plugin;
-
-        private UpdateCheck(VanishPlugin vanishPlugin) {
-            this.plugin = vanishPlugin;
-        }
-
-        @Override
-        public void run() {
-            final File pluginsFolder = this.plugin.getDataFolder().getParentFile();
-            final File updaterFolder = new File(pluginsFolder, "Updater");
-            final File updaterConfigFile = new File(updaterFolder, "config.yml");
-            String apiKey = null;
-            String latest = null;
-
-            if (updaterFolder.exists()) {
-                if (updaterConfigFile.exists()) {
-                    final YamlConfiguration config = YamlConfiguration.loadConfiguration(updaterConfigFile);
-                    apiKey = config.getString("api-key");
-                }
-            }
-
-            URL url;
-            try {
-                url = new URL("https://api.curseforge.com/servermods/files?projectIds=30949");
-            } catch (final MalformedURLException e) {
-                return;
-            }
-
-            URLConnection conn;
-            IOException exceptional = null;
-            try {
-                conn = url.openConnection();
-
-                conn.setConnectTimeout(5000);
-                if (apiKey != null) {
-                    conn.addRequestProperty("X-API-Key", apiKey);
-                }
-                conn.addRequestProperty("User-Agent", "KittehUpdater (by mbaxter)");
-                conn.setDoOutput(true);
-
-                final BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                final String response = reader.readLine();
-
-                final JSONArray array = (JSONArray) JSONValue.parse(response);
-                if (array.size() == 0) {
-                    return;
-                }
-
-                latest = (String) ((JSONObject) array.get(array.size() - 1)).get("name");
-            } catch (final IOException e) {
-                exceptional = e;
-            }
-            if (latest != null) {
-                this.plugin.latestVersion = latest;
-                if (!("v" + this.plugin.getCurrentVersion()).equals(latest)) {
-                    this.plugin.getLogger().info("Found a different version available: " + latest);
-                    this.plugin.getLogger().info("Check http://www.curse.com/server-mods/minecraft/vanish");
-                    this.plugin.versionDiff = true;
-                }
-            } else {
-                this.plugin.getLogger().info("Error: Could not check if plugin was up to date. Will try later");
-                if (exceptional != null) {
-                    this.plugin.getLogger().info("Exception message: " + exceptional.getMessage());
-                }
-            }
-        }
-    }
-
-    private final HashSet<String> haveInventoriesOpen = new HashSet<String>();
+    private final HashSet<String> haveInventoriesOpen = new HashSet<>();
+    private final HookManager hookManager = new HookManager(this);
     private String latestVersion = null;
     private boolean versionDiff = false;
     private VanishManager manager;
-    private final HookManager hookManager = new HookManager(this);
 
     /**
      * Informs VNP that a user has closed their fake chest
@@ -160,7 +78,7 @@ public final class VanishPlugin extends JavaPlugin {
      *
      * @return the hook manager
      */
-    public HookManager getHookManager() {
+    HookManager getHookManager() {
         return this.hookManager;
     }
 
@@ -210,7 +128,7 @@ public final class VanishPlugin extends JavaPlugin {
      *
      * @param player the un-vanishing user
      */
-    public void hooksUnvanish(Player player) {
+    void hooksUnVanish(Player player) {
         this.hookManager.onUnvanish(player);
     }
 
@@ -237,9 +155,9 @@ public final class VanishPlugin extends JavaPlugin {
      * Sends a message to all players with vanish.statusupdates but one
      *
      * @param message the message to send
-     * @param avoid player to not send the message to
+     * @param avoid   player to not send the message to
      */
-    public void messageStatusUpdate(String message, Player avoid) {
+    void messageStatusUpdate(String message, Player avoid) {
         for (final Player player : this.getServer().getOnlinePlayers()) {
             if ((player != null) && !player.equals(avoid) && VanishPerms.canSeeStatusUpdates(player)) {
                 player.sendMessage(message);
@@ -314,14 +232,11 @@ public final class VanishPlugin extends JavaPlugin {
 
         final VanishPlugin self = this;
         //Post-load stuff
-        this.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
-            @Override
-            public void run() {
-                if (VanishPlugin.this.getConfig().getBoolean("hooks.JSONAPI", false)) {
-                    VanishPlugin.this.hookManager.getHook(HookType.JSONAPI).onEnable();
-                }
-                MetricsOverlord.init(self);
+        this.getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
+            if (VanishPlugin.this.getConfig().getBoolean("hooks.JSONAPI", false)) {
+                VanishPlugin.this.hookManager.getHook(HookType.JSONAPI).onEnable();
             }
+            MetricsOverlord.init(self);
         }, 1);
 
         if (this.getConfig().getBoolean("hooks.spoutcraft", false)) {
@@ -367,7 +282,7 @@ public final class VanishPlugin extends JavaPlugin {
     /**
      * Reloads the VNP config
      */
-    public void reload() {
+    void reload() {
         this.reloadConfig();
         Settings.freshStart(this);
     }
@@ -385,5 +300,74 @@ public final class VanishPlugin extends JavaPlugin {
     @SuppressWarnings("deprecation")
     private void setInstance(VanishPlugin plugin) {
         org.kitteh.vanish.staticaccess.VanishNoPacket.setInstance(plugin);
+    }
+
+    final class UpdateCheck implements Runnable {
+        private final VanishPlugin plugin;
+
+        private UpdateCheck(VanishPlugin vanishPlugin) {
+            this.plugin = vanishPlugin;
+        }
+
+        @Override
+        public void run() {
+            final File pluginsFolder = this.plugin.getDataFolder().getParentFile();
+            final File updaterFolder = new File(pluginsFolder, "Updater");
+            final File updaterConfigFile = new File(updaterFolder, "config.yml");
+            String apiKey = null;
+            String latest = null;
+
+            if (updaterFolder.exists()) {
+                if (updaterConfigFile.exists()) {
+                    final YamlConfiguration config = YamlConfiguration.loadConfiguration(updaterConfigFile);
+                    apiKey = config.getString("api-key");
+                }
+            }
+
+            URL url;
+            try {
+                url = new URL("https://api.curseforge.com/servermods/files?projectIds=30949");
+            } catch (final MalformedURLException e) {
+                return;
+            }
+
+            URLConnection conn;
+            IOException exceptional = null;
+            try {
+                conn = url.openConnection();
+
+                conn.setConnectTimeout(5000);
+                if (apiKey != null) {
+                    conn.addRequestProperty("X-API-Key", apiKey);
+                }
+                conn.addRequestProperty("User-Agent", "KittehUpdater (by mbaxter)");
+                conn.setDoOutput(true);
+
+                final BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                final String response = reader.readLine();
+
+                final JSONArray array = (JSONArray) JSONValue.parse(response);
+                if (array.size() == 0) {
+                    return;
+                }
+
+                latest = (String) ((JSONObject) array.get(array.size() - 1)).get("name");
+            } catch (final IOException e) {
+                exceptional = e;
+            }
+            if (latest != null) {
+                this.plugin.latestVersion = latest;
+                if (!("v" + this.plugin.getCurrentVersion()).equals(latest)) {
+                    this.plugin.getLogger().info("Found a different version available: " + latest);
+                    this.plugin.getLogger().info("Check http://www.curse.com/server-mods/minecraft/vanish");
+                    this.plugin.versionDiff = true;
+                }
+            } else {
+                this.plugin.getLogger().info("Error: Could not check if plugin was up to date. Will try later");
+                if (exceptional != null) {
+                    this.plugin.getLogger().info("Exception message: " + exceptional.getMessage());
+                }
+            }
+        }
     }
 }

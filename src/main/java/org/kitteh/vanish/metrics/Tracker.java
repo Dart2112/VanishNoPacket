@@ -4,7 +4,7 @@ public final class Tracker extends Metrics.Plotter {
     private final String name;
     private int value, last;
 
-    public Tracker(String name) {
+    Tracker(String name) {
         this.name = name;
         this.value = 0;
         this.last = 0;

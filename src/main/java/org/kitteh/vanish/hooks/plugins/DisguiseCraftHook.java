@@ -8,7 +8,6 @@ import org.bukkit.plugin.Plugin;
 import org.kitteh.vanish.VanishPlugin;
 import org.kitteh.vanish.event.VanishStatusChangeEvent;
 import org.kitteh.vanish.hooks.Hook;
-
 import pgDev.bukkit.DisguiseCraft.DisguiseCraft;
 import pgDev.bukkit.DisguiseCraft.api.DisguiseCraftAPI;
 import pgDev.bukkit.DisguiseCraft.api.PlayerDisguiseEvent;

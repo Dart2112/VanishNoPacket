@@ -11,6 +11,7 @@ import org.kitteh.vanish.VanishPlugin;
  *
  * @deprecated This class will disappear in VNP 4.0
  */
+@SuppressWarnings("DeprecatedIsStillUsed")
 @Deprecated
 public final class VanishNoPacket {
     private static VanishPlugin instance;
@@ -19,7 +20,7 @@ public final class VanishNoPacket {
     /**
      * Queries if a player can see another player
      *
-     * @param looking the player who might be able to see another
+     * @param looking   the player who might be able to see another
      * @param uncertain the player who may or may not be seen
      * @return true if the looking player can see the other
      * @throws VanishNotLoadedException is VNP isn't loaded

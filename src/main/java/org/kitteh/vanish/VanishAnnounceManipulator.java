@@ -1,10 +1,5 @@
 package org.kitteh.vanish;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.kitteh.vanish.hooks.HookManager.HookType;
@@ -12,6 +7,11 @@ import org.kitteh.vanish.hooks.plugins.BPermissionsHook;
 import org.kitteh.vanish.hooks.plugins.GeoIPToolsHook;
 import org.kitteh.vanish.hooks.plugins.VaultHook;
 import org.kitteh.vanish.metrics.MetricsOverlord;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Controller of announcing joins and quits that aren't their most honest.
@@ -26,13 +26,13 @@ public final class VanishAnnounceManipulator {
 
     VanishAnnounceManipulator(VanishPlugin plugin) {
         this.plugin = plugin;
-        this.playerOnlineStatus = new HashMap<String, Boolean>();
-        this.delayedAnnouncePlayerList = new ArrayList<String>();
+        this.playerOnlineStatus = new HashMap<>();
+        this.delayedAnnouncePlayerList = new ArrayList<>();
     }
 
     public void addToDelayedAnnounce(String player) {
         this.playerOnlineStatus.put(player, false);
-        if (!Settings.getAutoFakeJoinSilent()) {
+        if (Settings.isAutoFakeJoinSilent()) {
             return;
         }
         this.delayedAnnouncePlayerList.add(player);
@@ -54,17 +54,14 @@ public final class VanishAnnounceManipulator {
      * @param playerName name of the player to query
      * @return true if player is considered online, false if not (or if not on server)
      */
+    @SuppressWarnings("unused")
     public boolean getFakeOnlineStatus(String playerName) {
         final Player player = this.plugin.getServer().getPlayerExact(playerName);
         if (player == null) {
             return false;
         }
         playerName = player.getName();
-        if (this.playerOnlineStatus.containsKey(playerName)) {
-            return this.playerOnlineStatus.get(playerName);
-        } else {
-            return true;
-        }
+        return this.playerOnlineStatus.getOrDefault(playerName, true);
     }
 
     /**
@@ -121,7 +118,7 @@ public final class VanishAnnounceManipulator {
     }
 
     void vanishToggled(Player player) {
-        if (!Settings.getAutoFakeJoinSilent() || !this.delayedAnnouncePlayerList.contains(player.getName())) {
+        if (Settings.isAutoFakeJoinSilent() || !this.delayedAnnouncePlayerList.contains(player.getName())) {
             return;
         }
         this.fakeJoin(player, false);

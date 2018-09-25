@@ -1,13 +1,13 @@
 package org.kitteh.vanish.listeners;
 
-import java.util.Iterator;
-import java.util.Set;
-
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.kitteh.vanish.VanishManager;
+
+import java.util.Iterator;
+import java.util.Set;
 
 public final class ListenServerPing implements Listener {
     private final VanishManager manager;
@@ -18,7 +18,7 @@ public final class ListenServerPing implements Listener {
 
     @EventHandler
     public void ping(ServerListPingEvent event) {
-        if (!(event instanceof Iterable)) {
+        if (event == null) {
             return; // Pre-API server
         }
         final Set<String> invisibles = this.manager.getVanishedPlayers();

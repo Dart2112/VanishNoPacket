@@ -3,8 +3,13 @@ package org.kitteh.vanish;
 import java.util.logging.Logger;
 
 public final class Debuggle {
-    private final Logger logger;
     private static Debuggle instance = null;
+    private final Logger logger;
+
+    private Debuggle(VanishPlugin plugin) {
+        this.logger = plugin.getLogger();
+        this.logger.info("Debug enabled. Disable in config.yml");
+    }
 
     public static void log(String message) {
         if (Debuggle.instance != null) {
@@ -18,10 +23,5 @@ public final class Debuggle {
 
     static void nah() {
         Debuggle.instance = null;
-    }
-
-    private Debuggle(VanishPlugin plugin) {
-        this.logger = plugin.getLogger();
-        this.logger.info("Debug enabled. Disable in config.yml");
     }
 }

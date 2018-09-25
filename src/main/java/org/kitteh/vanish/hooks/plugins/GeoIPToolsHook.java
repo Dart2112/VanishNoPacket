@@ -4,7 +4,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.kitteh.vanish.VanishPlugin;
 import org.kitteh.vanish.hooks.Hook;
-
 import uk.org.whoami.geoip.GeoIPLookup;
 import uk.org.whoami.geoip.GeoIPTools;
 
@@ -20,7 +19,7 @@ public final class GeoIPToolsHook extends Hook {
         if (this.geoip != null) {
             try {
                 result = this.geoip.getLocation(player.getAddress().getAddress()).city;
-            } catch (final Exception e) {
+            } catch (final Exception ignored) {
             }
         }
         return result != null ? result : "";
@@ -31,7 +30,7 @@ public final class GeoIPToolsHook extends Hook {
         if (this.geoip != null) {
             try {
                 result = this.geoip.getCountry(player.getAddress().getAddress()).getName();
-            } catch (final Exception e) {
+            } catch (final Exception ignored) {
             }
         }
         return result != null ? result : "";

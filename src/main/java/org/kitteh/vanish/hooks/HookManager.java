@@ -1,49 +1,19 @@
 package org.kitteh.vanish.hooks;
 
+import org.bukkit.entity.Player;
+import org.kitteh.vanish.Debuggle;
+import org.kitteh.vanish.VanishPlugin;
+import org.kitteh.vanish.hooks.plugins.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bukkit.entity.Player;
-import org.kitteh.vanish.Debuggle;
-import org.kitteh.vanish.VanishPlugin;
-import org.kitteh.vanish.hooks.plugins.BPermissionsHook;
-import org.kitteh.vanish.hooks.plugins.DisguiseCraftHook;
-import org.kitteh.vanish.hooks.plugins.DynmapHook;
-import org.kitteh.vanish.hooks.plugins.EssentialsHook;
-import org.kitteh.vanish.hooks.plugins.GeoIPToolsHook;
-import org.kitteh.vanish.hooks.plugins.JSONAPIHook;
-import org.kitteh.vanish.hooks.plugins.ProtocolLibHook;
-import org.kitteh.vanish.hooks.plugins.SpoutCraftHook;
-import org.kitteh.vanish.hooks.plugins.VaultHook;
-
+@SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused"})
 public final class HookManager {
-    public enum HookType {
-        BPermissions(BPermissionsHook.class),
-        DisguiseCraft(DisguiseCraftHook.class),
-        Dynmap(DynmapHook.class),
-        Essentials(EssentialsHook.class),
-        GeoIPTools(GeoIPToolsHook.class),
-        JSONAPI(JSONAPIHook.class),
-        ProtocolLib(ProtocolLibHook.class),
-        SpoutCraft(SpoutCraftHook.class),
-        Vault(VaultHook.class);
-
-        private Class<? extends Hook> clazz;
-
-        HookType(Class<? extends Hook> clazz) {
-            this.clazz = clazz;
-        }
-
-        public Class<? extends Hook> get() {
-            return this.clazz;
-        }
-    }
-
-    private final HashMap<String, Hook> hooks = new HashMap<String, Hook>();
+    private final HashMap<String, Hook> hooks = new HashMap<>();
     private final VanishPlugin plugin;
-
     public HookManager(VanishPlugin plugin) {
         this.plugin = plugin;
     }
@@ -55,7 +25,7 @@ public final class HookManager {
      * @return a list of deregistered hook names. Empty list if nothing deregistered.
      */
     public List<String> deregisterHook(Hook hook) {
-        final List<String> ret = new ArrayList<String>();
+        final List<String> ret = new ArrayList<>();
         for (final Map.Entry<String, Hook> i : this.hooks.entrySet()) {
             if (i.getValue().equals(hook)) {
                 this.deregisterHook(i.getKey());
@@ -133,7 +103,7 @@ public final class HookManager {
     /**
      * Registers and initializes a hook
      *
-     * @param name name to register
+     * @param name      name to register
      * @param hookClazz hook class to register
      */
     public void registerHook(String name, Class<? extends Hook> hookClazz) {
@@ -157,5 +127,27 @@ public final class HookManager {
 
     private void registerHook(HookType hook) {
         this.registerHook(hook.name(), hook.get());
+    }
+
+    public enum HookType {
+        BPermissions(BPermissionsHook.class),
+        DisguiseCraft(DisguiseCraftHook.class),
+        Dynmap(DynmapHook.class),
+        Essentials(EssentialsHook.class),
+        GeoIPTools(GeoIPToolsHook.class),
+        JSONAPI(JSONAPIHook.class),
+        ProtocolLib(ProtocolLibHook.class),
+        SpoutCraft(SpoutCraftHook.class),
+        Vault(VaultHook.class);
+
+        private Class<? extends Hook> clazz;
+
+        HookType(Class<? extends Hook> clazz) {
+            this.clazz = clazz;
+        }
+
+        public Class<? extends Hook> get() {
+            return this.clazz;
+        }
     }
 }

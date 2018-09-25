@@ -1,12 +1,11 @@
 package org.kitteh.vanish.hooks.plugins;
 
+import de.bananaco.bpermissions.api.ApiLayer;
+import de.bananaco.bpermissions.api.util.CalculableType;
 import org.bukkit.entity.Player;
 import org.kitteh.vanish.VanishPlugin;
 import org.kitteh.vanish.hooks.ChatProvider;
 import org.kitteh.vanish.hooks.Hook;
-
-import de.bananaco.bpermissions.api.ApiLayer;
-import de.bananaco.bpermissions.api.util.CalculableType;
 
 public final class BPermissionsHook extends Hook implements ChatProvider {
     public BPermissionsHook(VanishPlugin plugin) {
@@ -19,7 +18,7 @@ public final class BPermissionsHook extends Hook implements ChatProvider {
         if (this.bPermsEnabled()) {
             try {
                 result = this.getValue(player, "prefix");
-            } catch (final Exception e) {
+            } catch (final Exception ignored) {
             }
         }
         return result != null ? result : "";
@@ -31,7 +30,7 @@ public final class BPermissionsHook extends Hook implements ChatProvider {
         if (this.bPermsEnabled()) {
             try {
                 result = this.getValue(player, "suffix");
-            } catch (final Exception e) {
+            } catch (final Exception ignored) {
             }
         }
         return result != null ? result : "";
@@ -42,6 +41,7 @@ public final class BPermissionsHook extends Hook implements ChatProvider {
     }
 
     private String getValue(Player player, String key) {
+        //noinspection deprecation
         return ApiLayer.getValue(player.getWorld().getName(), CalculableType.USER, player.getName(), key);
     }
 }

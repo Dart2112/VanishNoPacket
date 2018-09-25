@@ -9,19 +9,17 @@ import org.bukkit.event.HandlerList;
  */
 public final class VanishStatusChangeEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
-
-    public static HandlerList getHandlerList() {
-        return VanishStatusChangeEvent.handlers;
-    }
-
     private final String name;
     private final boolean vanishing;
     private final Player player;
-
     public VanishStatusChangeEvent(Player player, boolean vanishing) {
         this.name = player.getName();
         this.vanishing = vanishing;
         this.player = player;
+    }
+
+    public static HandlerList getHandlerList() {
+        return VanishStatusChangeEvent.handlers;
     }
 
     @Override

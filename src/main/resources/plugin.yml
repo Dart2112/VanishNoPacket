@@ -1,6 +1,7 @@
 name: VanishNoPacket
 main: org.kitteh.vanish.VanishPlugin
 version: '${vnp-version}'
+api-version: 1.13
 website: http://kitteh.org
 softdepend: [Essentials,dynmap,JSONAPI,bPermissions,Spout,GeoIPTools,TagAPI,ProtocolLib,Vault]
 author: mbaxter
@@ -79,7 +80,7 @@ permissions:
       vanish.joinvanished: true
   vanish.silentquit:
     default: false
-    description: ALWAYS quit silently. 
+    description: ALWAYS quit silently.
   vanish.silentchests:
     default: false
     description: Allows user to read chests silently while vanished
@@ -226,7 +227,7 @@ permissions:
       vanish.adminalerts: true
       vanish.silentchests: true
   vanish.*:
-    default: false    
+    default: false
     description: Oh god everything.
     children:
       vanish.standard: true

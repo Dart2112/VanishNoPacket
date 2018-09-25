@@ -4,6 +4,7 @@ import org.bukkit.plugin.PluginManager;
 import org.kitteh.vanish.VanishPlugin;
 
 public final class MetricsOverlord {
+    private static final String[] PERMS_PLUGINS = {"DroxPerms", "GroupManager", "PermissionsBukkit", "PermissionsEx", "Privileges", "SimplyPerms", "Starburst", "bPermissions", "zPermissions"};
     private static Tracker command = new Tracker("");
     private static Tracker vanish = new Tracker("");
     private static Tracker unvanish = new Tracker("");
@@ -14,8 +15,6 @@ public final class MetricsOverlord {
     private static Tracker quitinvis = new Tracker("");
     private static Tracker joininvis = new Tracker("");
     private static Metrics metrics;
-
-    private static final String[] PERMS_PLUGINS = {"DroxPerms", "GroupManager", "PermissionsBukkit", "PermissionsEx", "Privileges", "SimplyPerms", "Starburst", "bPermissions", "zPermissions"};
 
     public static Tracker getCommandTracker() {
         return MetricsOverlord.command;
@@ -75,7 +74,7 @@ public final class MetricsOverlord {
             MetricsOverlord.metrics.createGraph("Online Mode").addPlotter(new Counter(plugin.getServer().getOnlineMode() ? "Online" : "Offline"));
             MetricsOverlord.metrics.createGraph("TagAPI").addPlotter(new Counter(plugin.getServer().getPluginManager().isPluginEnabled("TagAPI") ? "Yup" : "Nope"));
             MetricsOverlord.metrics.start();
-        } catch (final Exception e) {
+        } catch (final Exception ignored) {
         }
     }
 

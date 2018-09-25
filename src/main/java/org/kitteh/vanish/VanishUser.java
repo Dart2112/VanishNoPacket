@@ -2,7 +2,7 @@ package org.kitteh.vanish;
 
 import org.bukkit.entity.Player;
 
-public final class VanishUser {
+final class VanishUser {
     private boolean seeAll;
     private boolean noPickup;
     private boolean noFollow;
@@ -18,7 +18,7 @@ public final class VanishUser {
     private boolean lightning;
     private boolean bats;
 
-    public VanishUser(Player player) {
+    VanishUser(Player player) {
         this.seeAll = player.hasPermission("vanish.see");
         this.noPickup = player.hasPermission("vanish.nopickup");
         this.noFollow = player.hasPermission("vanish.nofollow");
@@ -35,128 +35,128 @@ public final class VanishUser {
         this.bats = player.hasPermission("vanish.effects.bats");
     }
 
-    public boolean getEffectBats() {
+    boolean getEffectBats() {
         return this.bats;
     }
 
-    public boolean getEffectExplode() {
+    boolean getEffectExplode() {
         return this.explode;
     }
 
-    public boolean getEffectFlames() {
+    boolean getEffectFlames() {
         return this.flames;
     }
 
-    public boolean getEffectLightning() {
+    boolean getEffectLightning() {
         return this.lightning;
     }
 
-    public boolean getEffectSmoke() {
+    boolean getEffectSmoke() {
         return this.smoke;
     }
 
-    public boolean getNoChat() {
+    boolean getNoChat() {
         return this.noChat;
     }
 
-    public boolean getNoFollow() {
+    boolean getNoFollow() {
         return this.noFollow;
     }
 
-    public boolean getNoHunger() {
+    boolean getNoHunger() {
         return this.noHunger;
     }
 
-    public boolean getNoInteract() {
+    boolean getNoInteract() {
         return this.noInteract;
     }
 
-    public boolean getNoPickup() {
+    boolean getNoPickup() {
         return this.noPickup;
     }
 
-    public boolean getPreventIncomingDamage() {
+    boolean getPreventIncomingDamage() {
         return this.preventIncomingDamage;
     }
 
-    public boolean getPreventOutgoingDamage() {
+    boolean getPreventOutgoingDamage() {
         return this.preventOutgoingDamage;
     }
 
-    public boolean getReadChestsSilently() {
+    boolean getReadChestsSilently() {
         return this.silentChestReads;
     }
 
-    public boolean getSeeAll() {
+    boolean getSeeAll() {
         return this.seeAll;
     }
 
-    public boolean toggleEffectBats() {
+    boolean toggleEffectBats() {
         this.bats = !this.bats;
         return this.bats;
     }
 
-    public boolean toggleEffectExplode() {
+    boolean toggleEffectExplode() {
         this.explode = !this.explode;
         return this.explode;
     }
 
-    public boolean toggleEffectFlames() {
+    boolean toggleEffectFlames() {
         this.flames = !this.flames;
         return this.flames;
     }
 
-    public boolean toggleEffectLightning() {
+    boolean toggleEffectLightning() {
         this.lightning = !this.lightning;
         return this.lightning;
     }
 
-    public boolean toggleEffectSmoke() {
+    boolean toggleEffectSmoke() {
         this.smoke = !this.smoke;
         return this.smoke;
     }
 
-    public boolean toggleIncomingDamage() {
+    boolean toggleIncomingDamage() {
         this.preventIncomingDamage = !this.preventIncomingDamage;
         return this.preventIncomingDamage;
     }
 
-    public boolean toggleNoChat() {
+    boolean toggleNoChat() {
         this.noChat = !this.noChat;
         return this.noChat;
     }
 
-    public boolean toggleNoFollow() {
+    boolean toggleNoFollow() {
         this.noFollow = !this.noFollow;
         return this.noFollow;
     }
 
-    public boolean toggleNoHunger() {
+    boolean toggleNoHunger() {
         this.noHunger = !this.noHunger;
         return this.noHunger;
     }
 
-    public boolean toggleNoInteract() {
+    boolean toggleNoInteract() {
         this.noInteract = !this.noInteract;
         return this.noInteract;
     }
 
-    public boolean toggleNoPickup() {
+    boolean toggleNoPickup() {
         this.noPickup = !this.noPickup;
         return this.noPickup;
     }
 
-    public boolean toggleOutgoingDamage() {
+    boolean toggleOutgoingDamage() {
         this.preventOutgoingDamage = !this.preventOutgoingDamage;
         return this.preventOutgoingDamage;
     }
 
-    public boolean toggleSeeAll() {
+    boolean toggleSeeAll() {
         this.seeAll = !this.seeAll;
         return this.seeAll;
     }
 
-    public boolean toggleSilentChestReads() {
+    boolean toggleSilentChestReads() {
         this.silentChestReads = !this.silentChestReads;
         return this.silentChestReads;
     }

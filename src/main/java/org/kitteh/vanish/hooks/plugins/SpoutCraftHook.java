@@ -1,12 +1,5 @@
 package org.kitteh.vanish.hooks.plugins;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.logging.Level;
-
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -15,47 +8,18 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.getspout.spoutapi.SpoutManager;
 import org.getspout.spoutapi.event.spout.SpoutCraftEnableEvent;
-import org.getspout.spoutapi.gui.Color;
-import org.getspout.spoutapi.gui.GenericGradient;
-import org.getspout.spoutapi.gui.GenericLabel;
-import org.getspout.spoutapi.gui.RenderPriority;
-import org.getspout.spoutapi.gui.WidgetAnchor;
+import org.getspout.spoutapi.gui.*;
 import org.getspout.spoutapi.player.SpoutPlayer;
 import org.kitteh.vanish.VanishPerms;
 import org.kitteh.vanish.VanishPlugin;
 import org.kitteh.vanish.hooks.Hook;
 
+import java.io.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.logging.Level;
+
 public final class SpoutCraftHook extends Hook implements Listener {
-    private final class PlayerData {
-        public String skin, cloak, title;
-
-        public PlayerData(String skin, String cloak, String title) {
-            this.skin = skin;
-            this.cloak = cloak;
-            this.title = title;
-        }
-    }
-
-    private final class StatusBar {
-        private final GenericLabel label;
-        private final GenericGradient box;
-        private final SpoutPlayer player;
-
-        public StatusBar(SpoutPlayer player) {
-            this.label = (GenericLabel) new GenericLabel(ChatColor.DARK_AQUA + "Invisible").setAnchor(WidgetAnchor.BOTTOM_LEFT).setX(20).setY(-20).setHeight(10).setWidth(40);
-            this.box = (GenericGradient) new GenericGradient().setTopColor(SpoutCraftHook.this.boxColor).setBottomColor(SpoutCraftHook.this.boxColor).setX(18).setY(-22).setHeight(12).setWidth(45).setAnchor(WidgetAnchor.BOTTOM_LEFT).setPriority(RenderPriority.High);
-            this.player = player;
-        }
-
-        public void assign() {
-            this.player.getMainScreen().attachWidget(SpoutCraftHook.this.plugin, this.box).attachWidget(SpoutCraftHook.this.plugin, this.label);
-        }
-
-        public void remove() {
-            this.player.getMainScreen().removeWidget(this.box).removeWidget(this.label);
-        }
-    }
-
     private boolean enabled;
     private HashMap<String, String> cloaks;
     private HashMap<String, String> skins;
@@ -91,11 +55,11 @@ public final class SpoutCraftHook extends Hook implements Listener {
         }
         this.plugin.getServer().getPluginManager().registerEvents(this, this.plugin);
         this.boxColor = new Color(0.1f, 0.1f, 0.1f, 0.4f);
-        this.cloaks = new HashMap<String, String>();
-        this.skins = new HashMap<String, String>();
-        this.titles = new HashMap<String, String>();
-        this.bars = new HashMap<String, StatusBar>();
-        this.playerDataMap = new HashMap<String, PlayerData>();
+        this.cloaks = new HashMap<>();
+        this.skins = new HashMap<>();
+        this.titles = new HashMap<>();
+        this.bars = new HashMap<>();
+        this.playerDataMap = new HashMap<>();
         final File confFile = new File(this.plugin.getDataFolder(), "spoutcraft.yml");
         final FileConfiguration config = YamlConfiguration.loadConfiguration(confFile);
         config.options().copyDefaults(true);
@@ -106,7 +70,16 @@ public final class SpoutCraftHook extends Hook implements Listener {
             this.enabled = false;
             return;
         }
-        config.setDefaults(YamlConfiguration.loadConfiguration(stream));
+        if (!confFile.exists()) {
+            try {
+                byte[] buffer = new byte[stream.available()];
+                stream.read(buffer);
+                OutputStream outStream = new FileOutputStream(confFile);
+                outStream.write(buffer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         try {
             config.save(confFile);
         } catch (final IOException e) {
@@ -129,12 +102,7 @@ public final class SpoutCraftHook extends Hook implements Listener {
             return;
         }
         final String name = player.getName();
-        this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(this.plugin, new Runnable() {
-            @Override
-            public void run() {
-                SpoutCraftHook.this.bars.remove(name);
-            }
-        }, 1);
+        this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(this.plugin, () -> SpoutCraftHook.this.bars.remove(name), 1);
     }
 
     @EventHandler
@@ -213,19 +181,19 @@ public final class SpoutCraftHook extends Hook implements Listener {
         String skin = null;
         String cloak = null;
         String title = null;
-        for (final String skinGroup : new HashSet<String>(this.skins.keySet())) {
+        for (final String skinGroup : new HashSet<>(this.skins.keySet())) {
             if (player.hasPermission("vanish.spout.skin." + skinGroup)) {
                 skin = this.skins.get(skinGroup);
                 break;
             }
         }
-        for (final String cloakGroup : new HashSet<String>(this.cloaks.keySet())) {
+        for (final String cloakGroup : new HashSet<>(this.cloaks.keySet())) {
             if (player.hasPermission("vanish.spout.cloak." + cloakGroup)) {
                 cloak = this.cloaks.get(cloakGroup);
                 break;
             }
         }
-        for (final String titleGroup : new HashSet<String>(this.titles.keySet())) {
+        for (final String titleGroup : new HashSet<>(this.titles.keySet())) {
             if (player.hasPermission("vanish.spout.title." + titleGroup)) {
                 title = this.titles.get(titleGroup).replace("%n", player.getName());
                 break;
@@ -253,6 +221,36 @@ public final class SpoutCraftHook extends Hook implements Listener {
     private void removeStatusBar(SpoutPlayer player) {
         if (player.isSpoutCraftEnabled() && VanishPerms.canSeeSpoutStatus(player)) {
             this.getStatusBar(player).remove();
+        }
+    }
+
+    private final class PlayerData {
+        String skin, cloak, title;
+
+        PlayerData(String skin, String cloak, String title) {
+            this.skin = skin;
+            this.cloak = cloak;
+            this.title = title;
+        }
+    }
+
+    private final class StatusBar {
+        private final GenericLabel label;
+        private final GenericGradient box;
+        private final SpoutPlayer player;
+
+        StatusBar(SpoutPlayer player) {
+            this.label = (GenericLabel) new GenericLabel(ChatColor.DARK_AQUA + "Invisible").setAnchor(WidgetAnchor.BOTTOM_LEFT).setX(20).setY(-20).setHeight(10).setWidth(40);
+            this.box = (GenericGradient) new GenericGradient().setTopColor(SpoutCraftHook.this.boxColor).setBottomColor(SpoutCraftHook.this.boxColor).setX(18).setY(-22).setHeight(12).setWidth(45).setAnchor(WidgetAnchor.BOTTOM_LEFT).setPriority(RenderPriority.High);
+            this.player = player;
+        }
+
+        void assign() {
+            this.player.getMainScreen().attachWidget(SpoutCraftHook.this.plugin, this.box).attachWidget(SpoutCraftHook.this.plugin, this.label);
+        }
+
+        void remove() {
+            this.player.getMainScreen().removeWidget(this.box).removeWidget(this.label);
         }
     }
 }
