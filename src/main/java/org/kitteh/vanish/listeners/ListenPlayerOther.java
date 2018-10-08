@@ -1,5 +1,6 @@
 package org.kitteh.vanish.listeners;
 
+import me.kangarko.compatbridge.model.CompMaterial;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.*;
@@ -56,39 +57,38 @@ public final class ListenPlayerOther implements Listener {
             Inventory inventory = null;
             final BlockState blockState = block.getState();
             boolean fake = false;
-            switch (block.getType()) {
-                case TRAPPED_CHEST:
-                case CHEST:
-                    final Chest chest = (Chest) blockState;
-                    inventory = this.plugin.getServer().createInventory(player, chest.getInventory().getSize());
-                    inventory.setContents(chest.getInventory().getContents());
-                    fake = true;
-                    break;
-                case ENDER_CHEST:
-                    if (this.plugin.getServer().getPluginManager().isPluginEnabled("EnderChestPlus") && VanishPerms.canNotInteract(player)) {
-                        event.setCancelled(true);
-                        return;
-                    }
-                    inventory = player.getEnderChest();
-                    break;
-                case DISPENSER:
-                    inventory = ((Dispenser) blockState).getInventory();
-                    break;
-                case HOPPER:
-                    inventory = ((Hopper) blockState).getInventory();
-                    break;
-                case DROPPER:
-                    inventory = ((Dropper) blockState).getInventory();
-                    break;
-                case FURNACE:
-                    inventory = ((Furnace) blockState).getInventory();
-                    break;
-                case BREWING_STAND:
-                    inventory = ((BrewingStand) blockState).getInventory();
-                    break;
-                case BEACON:
-                    inventory = ((Beacon) blockState).getInventory();
-                    break;
+            Material i = block.getType();
+            if (i == CompMaterial.TRAPPED_CHEST.toMaterial() || i == CompMaterial.CHEST.toMaterial()) {
+                final Chest chest = (Chest) blockState;
+                inventory = this.plugin.getServer().createInventory(player, chest.getInventory().getSize());
+                inventory.setContents(chest.getInventory().getContents());
+                fake = true;
+
+            } else if (i == CompMaterial.ENDER_CHEST.toMaterial()) {
+                if (this.plugin.getServer().getPluginManager().isPluginEnabled("EnderChestPlus") && VanishPerms.canNotInteract(player)) {
+                    event.setCancelled(true);
+                    return;
+                }
+                inventory = player.getEnderChest();
+
+            } else if (i == CompMaterial.DISPENSER.toMaterial()) {
+                inventory = ((Dispenser) blockState).getInventory();
+
+            } else if (i == CompMaterial.HOPPER.toMaterial()) {
+                inventory = ((Hopper) blockState).getInventory();
+
+            } else if (i == CompMaterial.DROPPER.toMaterial()) {
+                inventory = ((Dropper) blockState).getInventory();
+
+            } else if (i == CompMaterial.FURNACE.toMaterial()) {
+                inventory = ((Furnace) blockState).getInventory();
+
+            } else if (i == CompMaterial.BREWING_STAND.toMaterial()) {
+                inventory = ((BrewingStand) blockState).getInventory();
+
+            } else if (i == CompMaterial.BEACON.toMaterial()) {
+                inventory = ((Beacon) blockState).getInventory();
+
             }
             if (inventory != null) {
                 event.setCancelled(true);
@@ -104,7 +104,7 @@ public final class ListenPlayerOther implements Listener {
             event.setCancelled(true);
             return;
         }
-        if ((event.getAction() == Action.PHYSICAL) && (event.getClickedBlock().getType() == Material.FARMLAND)) {
+        if ((event.getAction() == Action.PHYSICAL) && (event.getClickedBlock().getType() == CompMaterial.FARMLAND.toMaterial())) {
             if (this.plugin.getManager().isVanished(player) && VanishPerms.canNotTrample(player)) {
                 event.setCancelled(true);
             }
