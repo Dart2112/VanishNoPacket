@@ -12,7 +12,6 @@ import org.json.simple.JSONValue;
 import org.kitteh.vanish.hooks.HookManager;
 import org.kitteh.vanish.hooks.HookManager.HookType;
 import org.kitteh.vanish.listeners.*;
-import org.kitteh.vanish.metrics.MetricsOverlord;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -232,13 +231,6 @@ public final class VanishPlugin extends JavaPlugin {
 
         final VanishPlugin self = this;
         //Post-load stuff
-        this.getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
-            if (VanishPlugin.this.getConfig().getBoolean("hooks.JSONAPI", false)) {
-                VanishPlugin.this.hookManager.getHook(HookType.JSONAPI).onEnable();
-            }
-            MetricsOverlord.init(self);
-        }, 1);
-
         if (this.getConfig().getBoolean("hooks.spoutcraft", false)) {
             this.hookManager.getHook(HookType.SpoutCraft).onEnable();
         }

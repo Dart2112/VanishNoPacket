@@ -135,7 +135,6 @@ public final class HookManager {
         Dynmap(DynmapHook.class),
         Essentials(EssentialsHook.class),
         GeoIPTools(GeoIPToolsHook.class),
-        JSONAPI(JSONAPIHook.class),
         ProtocolLib(ProtocolLibHook.class),
         SpoutCraft(SpoutCraftHook.class),
         Vault(VaultHook.class);

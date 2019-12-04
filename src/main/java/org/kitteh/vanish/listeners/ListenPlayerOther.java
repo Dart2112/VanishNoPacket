@@ -1,6 +1,6 @@
 package org.kitteh.vanish.listeners;
 
-import me.kangarko.compatbridge.model.CompMaterial;
+import net.lapismc.lapiscore.utils.CompatibleMaterial;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.*;
@@ -58,36 +58,33 @@ public final class ListenPlayerOther implements Listener {
             final BlockState blockState = block.getState();
             boolean fake = false;
             Material i = block.getType();
-            if (i == CompMaterial.TRAPPED_CHEST.toMaterial() || i == CompMaterial.CHEST.toMaterial()) {
+            if (i == CompatibleMaterial.TRAPPED_CHEST.parseMaterial() || i == CompatibleMaterial.CHEST.parseMaterial()) {
                 final Chest chest = (Chest) blockState;
                 inventory = this.plugin.getServer().createInventory(player, chest.getInventory().getSize());
                 inventory.setContents(chest.getInventory().getContents());
                 fake = true;
 
-            } else if (i == CompMaterial.ENDER_CHEST.toMaterial()) {
+            } else if (i == CompatibleMaterial.ENDER_CHEST.parseMaterial()) {
                 if (this.plugin.getServer().getPluginManager().isPluginEnabled("EnderChestPlus") && VanishPerms.canNotInteract(player)) {
                     event.setCancelled(true);
                     return;
                 }
                 inventory = player.getEnderChest();
 
-            } else if (i == CompMaterial.DISPENSER.toMaterial()) {
+            } else if (i == CompatibleMaterial.DISPENSER.parseMaterial()) {
                 inventory = ((Dispenser) blockState).getInventory();
 
-            } else if (i == CompMaterial.HOPPER.toMaterial()) {
+            } else if (i == CompatibleMaterial.HOPPER.parseMaterial()) {
                 inventory = ((Hopper) blockState).getInventory();
 
-            } else if (i == CompMaterial.DROPPER.toMaterial()) {
+            } else if (i == CompatibleMaterial.DROPPER.parseMaterial()) {
                 inventory = ((Dropper) blockState).getInventory();
 
-            } else if (i == CompMaterial.FURNACE.toMaterial()) {
+            } else if (i == CompatibleMaterial.FURNACE.parseMaterial()) {
                 inventory = ((Furnace) blockState).getInventory();
 
-            } else if (i == CompMaterial.BREWING_STAND.toMaterial()) {
+            } else if (i == CompatibleMaterial.BREWING_STAND.parseMaterial()) {
                 inventory = ((BrewingStand) blockState).getInventory();
-
-            } else if (i == CompMaterial.BEACON.toMaterial()) {
-                inventory = ((Beacon) blockState).getInventory();
 
             }
             if (inventory != null) {
@@ -104,7 +101,7 @@ public final class ListenPlayerOther implements Listener {
             event.setCancelled(true);
             return;
         }
-        if ((event.getAction() == Action.PHYSICAL) && (event.getClickedBlock().getType() == CompMaterial.FARMLAND.toMaterial())) {
+        if ((event.getAction() == Action.PHYSICAL) && (event.getClickedBlock().getType() == CompatibleMaterial.FARMLAND.parseMaterial())) {
             if (this.plugin.getManager().isVanished(player) && VanishPerms.canNotTrample(player)) {
                 event.setCancelled(true);
             }
